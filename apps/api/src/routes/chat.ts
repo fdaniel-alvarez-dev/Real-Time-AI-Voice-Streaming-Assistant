@@ -175,9 +175,11 @@ export function registerChatRoutes(app: FastifyInstance, deps: Deps, metrics: Te
       metrics.wsConnectionsTotal.inc();
       const log = req.log;
 
-      connection.socket.on("message", async (rawMessage: Buffer) => {
+      const ws = (connection as any)?.socket ?? (connection as any);
+
+      ws.on("message", async (rawMessage: Buffer) => {
         await handleWsChatMessage({
-          send: (data) => connection.socket.send(data),
+          send: (data) => ws.send(data),
           reqId: req.id,
           log,
           app,
