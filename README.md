@@ -106,6 +106,8 @@ npm run dev
 - Web UI: `http://127.0.0.1:3000`
 - API: `http://127.0.0.1:3001`
 
+Note: `npm run dev` will auto-create `config/runtime.json` (if missing) from `config/runtime.example.json`.
+
 ### Useful endpoints
 
 ```bash
@@ -165,4 +167,3 @@ An example is in `config/runtime.openai.example.json`.
 - Upgrade RAG to SQLite/pgvector + background indexing
 - Add OpenTelemetry export (Tempo/Jaeger) and log shipping (Loki/ELK)
 - Add “barge-in” semantics for WS (cancel generation on user interruption)
-

@@ -11,7 +11,7 @@
   },
   "scripts": {
     "setup:local": "node scripts/setupLocal.mjs",
-    "dev": "npm run build:packages && concurrently -n api,web -c cyan,magenta \"npm:dev:api\" \"npm:dev:web\"",
+    "dev": "npm run setup:local && npm run build:packages && concurrently -n api,web -c cyan,magenta \"npm:dev:api\" \"npm:dev:web\"",
     "dev:api": "npm --workspace @rta/api run dev",
     "dev:web": "npm --workspace @rta/web run dev",
     "build": "npm run build:packages && npm run build:apps",
