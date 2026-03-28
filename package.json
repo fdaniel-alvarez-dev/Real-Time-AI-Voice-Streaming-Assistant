@@ -1,0 +1,38 @@
+{
+  "name": "real-time-ai-voice-streaming-assistant",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup:local": "node scripts/setupLocal.mjs",
+    "dev": "npm run build:packages && concurrently -n api,web -c cyan,magenta \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm --workspace @rta/api run dev",
+    "dev:web": "npm --workspace @rta/web run dev",
+    "build": "npm run build:packages && npm run build:apps",
+    "build:packages": "npm -w @rta/telemetry run build && npm -w @rta/core run build && npm -w @rta/rag run build && npm -w @rta/llm run build",
+    "build:apps": "npm -w @rta/api run build && npm -w @rta/web run build",
+    "typecheck": "npm --workspaces --if-present run typecheck",
+    "test": "npm run build:packages && vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier -w ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^22.0.0",
+    "concurrently": "^9.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "tsup": "^8.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "undici": "^7.0.0",
+    "vitest": "^3.0.0"
+  }
+}

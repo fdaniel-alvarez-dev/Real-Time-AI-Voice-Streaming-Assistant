@@ -1,0 +1,28 @@
+{
+  "name": "@rta/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup src/index.ts --format esm --dts --outDir dist",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.0",
+    "@fastify/rate-limit": "^10.0.0",
+    "@fastify/websocket": "^11.0.0",
+    "@fastify/type-provider-typebox": "^6.0.0",
+    "@rta/core": "0.1.0",
+    "@rta/llm": "0.1.0",
+    "@rta/rag": "0.1.0",
+    "@rta/telemetry": "0.1.0",
+    "@sinclair/typebox": "^0.34.0",
+    "fastify": "^5.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
+

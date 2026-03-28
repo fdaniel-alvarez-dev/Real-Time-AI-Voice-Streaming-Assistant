@@ -1,0 +1,27 @@
+[
+  {
+    "id": "product.overview",
+    "title": "Real-Time AI Voice & Streaming Assistant (Repo) — Scope",
+    "tags": ["product", "architecture"],
+    "content": "This repository is a production-minded reference implementation for real-time AI experiences: WebSockets for bi-directional sessions, SSE for simple server->client streams, and a lightweight RAG layer for grounding. It intentionally avoids heavy STT/TTS, queues, and microservices to keep the core streaming and observability concerns easy to reason about."
+  },
+  {
+    "id": "ws.vs.sse",
+    "title": "WebSockets vs SSE — Practical guidance",
+    "tags": ["realtime", "streaming"],
+    "content": "Use SSE when the client only needs a stream of server events and you want simple HTTP semantics and easy load balancing. Use WebSockets when you need bi-directional messages (interruptions, barge-in, backchannel, tool calls) or when you want a single long-lived session transport."
+  },
+  {
+    "id": "observability.strategy",
+    "title": "Observability strategy",
+    "tags": ["observability", "debugging"],
+    "content": "Each request or stream is correlated by requestId + sessionId + traceId. Retrieval, generation, and streaming are instrumented with spans (duration logs) and Prometheus-style metrics (histograms + counters). Failure paths are intentional and explicit: timeouts, bad inputs, safety refusals, and provider fallbacks."
+  },
+  {
+    "id": "security.guardrails",
+    "title": "Guardrails and safety",
+    "tags": ["security", "safety"],
+    "content": "This system includes basic input validation, rate limiting, and refusal behavior for unsafe requests. In production you'd replace the pattern-based safety layer with policy + model-based classifiers, plus strong authentication and per-tenant isolation."
+  }
+]
+

@@ -1,0 +1,16 @@
+{
+  "envName": "local",
+  "http": { "host": "127.0.0.1", "port": 3001 },
+  "rateLimit": { "max": 120, "timeWindowMs": 60000 },
+  "rag": { "topK": 4, "minScore": 0.15 },
+  "llm": {
+    "provider": "openai",
+    "openai": {
+      "baseUrl": "https://api.openai.com/v1",
+      "model": "gpt-4o-mini",
+      "apiKeyEnvVar": "OPENAI_API_KEY"
+    }
+  },
+  "safety": { "refuseOn": ["self_harm", "illegal_activity", "pii_exfiltration"] }
+}
+

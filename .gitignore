@@ -1,0 +1,16 @@
+node_modules
+dist
+.turbo
+.cache
+.DS_Store
+*.log
+
+# Local config / secrets
+.env
+.env.*
+config/runtime.json
+
+# Vite
+apps/web/dist
+apps/web/.vite
+
