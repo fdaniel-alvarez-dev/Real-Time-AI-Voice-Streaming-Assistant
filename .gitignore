@@ -4,13 +4,22 @@ dist
 .cache
 .DS_Store
 *.log
+coverage
+.nyc_output
 
 # Local config / secrets
 .env
 .env.*
 config/runtime.json
+*.pem
+*.key
+*.p12
+.npmrc
 
 # Vite
 apps/web/dist
 apps/web/.vite
 
+# IDEs
+.vscode
+.idea

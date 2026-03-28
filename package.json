@@ -20,6 +20,8 @@
     "typecheck": "npm --workspaces --if-present run typecheck",
     "test": "npm run build:packages && vitest run",
     "test:watch": "vitest",
+    "test:e2e:openai": "RTA_E2E=1 vitest run e2e/openai.e2e.test.ts apps/api/src/server/openai.e2e.test.ts",
+    "e2e:smoke": "node scripts/e2eSmoke.mjs",
     "lint": "eslint .",
     "format": "prettier -w ."
   },

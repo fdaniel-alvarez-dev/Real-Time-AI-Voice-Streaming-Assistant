@@ -5,6 +5,62 @@ import { Type } from "@sinclair/typebox";
 import type { Deps } from "../server/deps.js";
 import { streamAssistantReply } from "../agent/voiceAgent.js";
 
+export type WsSend = (data: string) => void;
+
+export async function handleWsChatMessage(opts: {
+  send: WsSend;
+  reqId: string;
+  log: any;
+  app: FastifyInstance;
+  deps: Deps;
+  metrics: TelemetryMetrics;
+  rawMessage: Buffer;
+}): Promise<void> {
+  const { send, reqId, log, app, deps, metrics, rawMessage } = opts;
+
+  let payload: any;
+  try {
+    payload = JSON.parse(rawMessage.toString("utf8"));
+  } catch {
+    send(JSON.stringify({ type: "error", message: "Invalid JSON." }));
+    return;
+  }
+
+  const sessionId = String(payload.sessionId ?? "");
+  const text = String(payload.text ?? "");
+  if (!sessionId || !text) {
+    send(JSON.stringify({ type: "error", message: "Missing sessionId or text." }));
+    return;
+  }
+
+  try {
+    await withTrace(withLogContext(log, { sessionId, requestId: reqId }), async () => {
+      send(JSON.stringify({ type: "start", sessionId }));
+      const start = performance.now();
+      const stream = streamAssistantReply({
+        runtime: app.runtime,
+        deps,
+        metrics,
+        logger: log,
+        sessionId,
+        text
+      });
+      for await (const chunk of stream) {
+        if (chunk.type === "token") send(JSON.stringify({ type: "token", token: chunk.token }));
+        if (chunk.type === "error") send(JSON.stringify({ type: "error", message: chunk.message }));
+      }
+      metrics.llmGenerationDurationMs.observe(
+        { provider: deps.llm.provider, stage: "stream" },
+        performance.now() - start
+      );
+      send(JSON.stringify({ type: "done" }));
+    });
+  } catch (error: any) {
+    send(JSON.stringify({ type: "error", message: String(error?.message ?? "ws error") }));
+    send(JSON.stringify({ type: "done" }));
+  }
+}
+
 export function registerChatRoutes(app: FastifyInstance, deps: Deps, metrics: TelemetryMetrics) {
   app.post(
     "/v1/chat",
@@ -119,55 +175,16 @@ export function registerChatRoutes(app: FastifyInstance, deps: Deps, metrics: Te
       metrics.wsConnectionsTotal.inc();
       const log = req.log;
 
-      connection.socket.on("message", async (buf: Buffer) => {
-        const raw = buf;
-        let payload: any;
-        try {
-          payload = JSON.parse(raw.toString("utf8"));
-        } catch {
-          connection.socket.send(JSON.stringify({ type: "error", message: "Invalid JSON." }));
-          return;
-        }
-
-        const sessionId = String(payload.sessionId ?? "");
-        const text = String(payload.text ?? "");
-        if (!sessionId || !text) {
-          connection.socket.send(JSON.stringify({ type: "error", message: "Missing sessionId or text." }));
-          return;
-        }
-
-        try {
-          await withTrace(withLogContext(log, { sessionId, requestId: req.id }), async () => {
-            connection.socket.send(JSON.stringify({ type: "start", sessionId }));
-            const start = performance.now();
-            const stream = streamAssistantReply({
-              runtime: app.runtime,
-              deps,
-              metrics,
-              logger: log,
-              sessionId,
-              text
-            });
-            for await (const chunk of stream) {
-              if (chunk.type === "token") {
-                connection.socket.send(JSON.stringify({ type: "token", token: chunk.token }));
-              }
-              if (chunk.type === "error") {
-                connection.socket.send(JSON.stringify({ type: "error", message: chunk.message }));
-              }
-            }
-            metrics.llmGenerationDurationMs.observe(
-              { provider: deps.llm.provider, stage: "stream" },
-              performance.now() - start
-            );
-            connection.socket.send(JSON.stringify({ type: "done" }));
-          });
-        } catch (error: any) {
-          connection.socket.send(
-            JSON.stringify({ type: "error", message: String(error?.message ?? "ws error") })
-          );
-          connection.socket.send(JSON.stringify({ type: "done" }));
-        }
+      connection.socket.on("message", async (rawMessage: Buffer) => {
+        await handleWsChatMessage({
+          send: (data) => connection.socket.send(data),
+          reqId: req.id,
+          log,
+          app,
+          deps,
+          metrics,
+          rawMessage
+        });
       });
     }
   );
